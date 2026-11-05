@@ -1,0 +1,58 @@
+# Demo network: fictional people at real companies (so the job
+# board lookups have something to find). Replace with your own in
+# data/network.yml, or import a CSV from the People page.
+people:
+  - name: "Jordan Rivers"
+    position: "Software Engineer"
+    company: "Stripe"
+    industry_tags: ["Payments", "Fintech"]
+    how_met: "Friend of Sister"
+    closeness: 4
+    interactions:
+      - { date: "2026-08-02", kind: "coffee_chat", notes: "Talked about the new grad program" }
+  - name: "Priya Nandakumar"
+    position: "ML Researcher"
+    company: "OpenAI"
+    industry_tags: ["AI/ML", "LLMs"]
+    how_met: "LinkedIn (career fair)"
+    closeness: 2
+  - name: "Sam Okafor"
+    position: "Product Manager"
+    company: "Ramp"
+    industry_tags: ["Fintech", "Spend Management"]
+    how_met: "Coworker of Aunt"
+    closeness: 3
+    interactions:
+      - { date: "2026-03-10", kind: "message", notes: "Congratulated on promotion" }
+  - name: "Lena Fischer"
+    position: "Design Engineer"
+    company: "Figma"
+    industry_tags: ["Developer Tools", "Design Software"]
+    how_met: "Personal Friend"
+    closeness: 5
+    interactions:
+      - { date: "2026-10-20", kind: "call", notes: "Offered to refer me" }
+  - name: "Marcus Bell"
+    position: "Forward Deployed Engineer"
+    company: "Palantir"
+    industry_tags: ["Defense", "Data Platforms"]
+    how_met: "Teammate of Cousin"
+    closeness: 3
+  - name: "Hana Sato"
+    position: "Data Engineer"
+    company: "Databricks"
+    industry_tags: ["Data Platforms", "AI/ML"]
+    how_met: "Club Friend of Mom"
+    closeness: 2
+  - name: "Diego Alvarez"
+    position: "Senior Engineering Manager"
+    company: "Notion"
+    industry_tags: ["Productivity Software", "SaaS"]
+    how_met: "Work Friend of Uncle"
+    closeness: 3
+  - name: "Ruth Kim"
+    position: "Retired"
+    company: "Retired"
+    industry_tags: ["SaaS"]
+    how_met: "Work Friend of Uncle"
+    closeness: 4

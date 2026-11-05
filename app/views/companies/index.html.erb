@@ -1,0 +1,55 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Companies <small class="muted"><%= @companies.size %></small></h1>
+    <%= form_with url: companies_path, class: "inline-form" do |f| %>
+      <%= f.text_field :name, placeholder: "Watch a company…", "aria-label": "Watch a company with no contacts yet" %>
+      <%= f.submit "Watch", class: "btn small" %>
+    <% end %>
+  </div>
+  <% any_news = @companies.any? { |c| c.news_summary.present? } %>
+  <div class="table-scroll">
+  <table class="table">
+    <thead><tr><th>Company</th><th>People</th><th>New-grad roles</th><th>Trend</th><th>Job board</th><% if any_news %><th>Signal</th><% end %></tr></thead>
+    <tbody>
+    <% @companies.each do |c| %>
+      <tr>
+        <td><div class="who"><%= industry_dot(c.industry) %><strong><%= c.name %></strong></div>
+          <div class="sub small links">
+            <% if c.careers_url.present? %><%= link_to "Careers ↗", c.careers_url, target: "_blank", rel: "noopener" %><% end %>
+            <% if c.website.present? %><%= link_to URI(c.website).host.delete_prefix("www.") , c.website, target: "_blank", rel: "noopener", class: "muted" %><% end %>
+          </div></td>
+        <td class="muted"><%= c.people.map(&:name).join(", ").presence || (c.watch ? "watching" : "—") %></td>
+        <td><%= (n = @new_grad_counts[c.id].to_i).positive? ? n : tag.span("—", class: "muted") %></td>
+        <td><% t = c.hiring_trend %><%= t ? "#{t.positive? ? '+' : ''}#{(t * 100).round}%" : tag.span("—", class: "muted") %></td>
+        <td>
+          <details class="board">
+            <summary>
+              <% if c.ats_provider.present? && c.ats_provider != "none" %>
+                <span class="pill"><%= c.ats_provider %></span>
+                <% unless c.ats_verified %><span class="warn-dot" title="Auto-detected: check it's the right company"></span><% end %>
+              <% elsif c.careers_url.present? %>
+                <span class="muted" title="Careers page found, but its job system can't be read automatically">link only</span>
+              <% else %>
+                <span class="muted">none</span>
+              <% end %>
+            </summary>
+            <%= form_with model: c, class: "stack board-form" do |f| %>
+              <%= f.text_field :website, placeholder: "Website, e.g. example.com", "aria-label": "Website" %>
+              <%= f.url_field :careers_url, placeholder: "Careers page URL", "aria-label": "Careers page URL" %>
+              <div class="inline-form tight">
+                <%= f.select :ats_provider, [["auto", ""], *Jobs::Boards::PROVIDERS.keys, "none"], {}, class: "mini", "aria-label": "Job system" %>
+                <%= f.text_field :ats_slug, placeholder: "board slug or URL", "aria-label": "Board slug" %>
+                <%= f.submit "Save", class: "btn tiny" %>
+              </div>
+            <% end %>
+          </details>
+        </td>
+        <% if any_news %><td class="muted small"><%= c.news_summary&.truncate(140) %></td><% end %>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted small footnote">Each refresh finds a company's careers page from its website and reads the job system behind it.
+    Add a website under "edit" if one is missing. An amber dot means a job board was guessed from the name, so check it's the right company.</p>
+</div>

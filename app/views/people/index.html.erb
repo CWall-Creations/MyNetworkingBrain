@@ -1,0 +1,39 @@
+<div class="page">
+  <div class="page-head">
+    <h1>People <small class="muted count"><%= @people.size %></small></h1>
+    <div class="actions">
+      <%= link_to "Add person", new_person_path, class: "btn" %>
+      <%= link_to "Import CSV", new_import_path, class: "btn ghost" %>
+      <%= link_to "Export CSV", people_path(format: :csv), class: "btn ghost" %>
+    </div>
+  </div>
+
+  <details class="card intake">
+    <summary>Describe someone and let the agent fill in the details</summary>
+    <%= form_with url: intake_people_path, class: "stack" do |f| %>
+      <%= f.text_field :name, placeholder: "Their name (stays on your machine)", required: true %>
+      <%= f.text_area :description, rows: 2, placeholder: "e.g. met her at a hackathon, she's a PM at Stripe working on payments infra, super helpful" %>
+      <%= f.submit "Fill in", class: "btn small" %>
+    <% end %>
+  </details>
+
+  <%= form_with url: rate_people_path, method: :patch, data: { controller: "autosubmit" } do %>
+    <table class="table people-table">
+      <thead><tr><th>Person</th><th>Via</th><th>Closeness</th><th>Strength</th><th>Last contact</th></tr></thead>
+      <tbody>
+        <% @people.each do |p| %>
+          <tr>
+            <td>
+              <div class="who"><%= industry_dot(p.industry) %><%= link_to p.name, edit_person_path(p) %></div>
+              <div class="muted small sub"><%= [p.position, p.company_names.presence].compact.join(" · ") %></div>
+            </td>
+            <td class="muted"><%= p.introducer&.label || p.relationship_context&.humanize %></td>
+            <td><%= select_tag "closeness[#{p.id}]", options_for_select(1..5, p.closeness), class: "mini", data: { action: "autosubmit#submit" }, "aria-label": "Closeness for #{p.name}" %></td>
+            <td><div class="bar small" title="<%= p.strength_label %>"><span style="width: <%= (p.strength * 100).round %>%"></span></div></td>
+            <td class="muted"><%= p.last_contact ? p.last_contact.strftime("%b %Y") : "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>

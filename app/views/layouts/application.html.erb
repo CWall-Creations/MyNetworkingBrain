@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Networking Brain" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="<%= controller_name %>">
+    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <header class="topbar">
+      <%= link_to root_path, class: "brand" do %><span class="brand-orb"></span>Networking <em>Brain</em><% end %>
+      <nav>
+        <%= link_to "Graph", root_path, class: ("on" if controller_name == "graph") %>
+        <%= link_to "People", people_path, class: ("on" if controller_name.in?(%w[people imports])) %>
+        <%= link_to "Companies", companies_path, class: ("on" if controller_name == "companies") %>
+        <%= link_to "Profile", profile_path, class: ("on" if controller_name == "profiles") %>
+      </nav>
+    </header>
+    <% if notice || alert %>
+      <div class="flash <%= alert ? 'alert' : 'notice' %>" data-controller="flash"><%= alert || notice %></div>
+    <% end %>
+    <main><%= yield %></main>
+  </body>
+</html>

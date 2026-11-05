@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# Blocks commits that would publish personal data. Runs as a git pre-commit hook
+# (installed by bin/setup) and can be run by hand: bin/privacy-check [--all]
+#
+# 1. No staged files under data/, storage/, .env, *.sqlite3, *.csv (outside data.example/ and test fixtures), *.pdf
+# 2. No staged file contains the name of anyone in your local database or profile.
+require "open3"
+require "json"
+require "yaml"
+require "date"
+
+# Works on old system Rubies too (git hooks may not see your rbenv Ruby).
+def load_yaml(path)
+  YAML.safe_load(File.read(path), permitted_classes: [Date], aliases: true) || {}
+rescue StandardError
+  {}
+end
+
+root = File.expand_path("..", __dir__)
+Dir.chdir(root)
+
+files =
+  if ARGV.include?("--all")
+    `git ls-files`.split("\n")
+  else
+    `git diff --cached --name-only --diff-filter=ACMR`.split("\n")
+  end
+exit 0 if files.empty?
+
+BLOCKED = [
+  %r{\Adata/}, %r{\Astorage/(?!\.keep\z)}, %r{(\A|/)\.env(\.(?!example\z)[^/]*)?\z}, /\.sqlite3/,
+  /\.pdf\z/i, ->(f) { f.end_with?(".csv") && !f.start_with?("data.example/", "test/fixtures/") }
+].freeze
+
+problems = files.select { |f| BLOCKED.any? { |b| b.is_a?(Proc) ? b.call(f) : f.match?(b) } }
+                .map { |f| "#{f}: private file type/location" }
+
+# Collect real names from the local DB + profile (never printed in full to the hook output).
+names = []
+db = "storage/development.sqlite3"
+if File.exist?(db)
+  out, status = Open3.capture2("sqlite3", db, "SELECT name FROM people;")
+  names += out.split("\n") if status.success?
+end
+profile = "data/profile.yml"
+names << load_yaml(profile)["name"] if File.exist?(profile)
+names = names.compact.map(&:strip).select { |n| n.split.size >= 2 && n.length >= 6 }.uniq
+# Demo people in data.example/ are fictional and meant to be committed
+demo = File.exist?("data.example/network.yml") ? Array(load_yaml("data.example/network.yml")["people"]).map { |p| p["name"] } : []
+names -= demo
+names -= [load_yaml("data.example/profile.yml")["name"]] if File.exist?("data.example/profile.yml")
+
+unless names.empty?
+  pattern = Regexp.union(names.map { |n| /\b#{Regexp.escape(n)}\b/i })
+  files.each do |f|
+    next unless File.file?(f) && File.size(f) < 2_000_000
+    content = ARGV.include?("--all") ? File.read(f) : `git show :"#{f}" 2>/dev/null`
+    next unless content.valid_encoding? || (content = content.scrub)
+    if (m = content.match(pattern))
+      problems << "#{f}: contains a contact's name (#{m[0][0]}…)"
+    end
+  end
+end
+
+if problems.empty?
+  exit 0
+else
+  warn "\n✋ privacy-check blocked this commit. Personal data must stay local:\n\n"
+  problems.each { |p| warn "  - #{p}" }
+  warn "\nUnstage with: git restore --staged <file>   (bypass at your own risk: git commit --no-verify)\n\n"
+  exit 1
+end

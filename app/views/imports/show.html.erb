@@ -1,0 +1,45 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Review import <small class="muted"><%= @batch.filename %> · <%= @batch.rows.size %> rows</small></h1>
+  </div>
+  <% if @batch.state == "applied" %>
+    <p>Already imported. <%= link_to "Go to People", people_path %></p>
+  <% else %>
+  <p class="muted">Check each row. Warnings are flagged in amber, agent suggestions in blue. Use &amp; to separate multiple companies.
+    The agent only sees positions, companies and how-you-met text, never names.</p>
+  <%= form_with url: import_path(@batch), method: :patch do |f| %>
+    <div class="table-scroll">
+    <table class="table review">
+      <thead><tr><th></th><th>Name</th><th>Position</th><th>Company</th><th>Status</th><th>Industry</th><th>Via</th><th>Context</th><th>Close</th></tr></thead>
+      <tbody>
+      <% @batch.rows.each_with_index do |r, i| %>
+        <% base = "rows[#{i}]" %>
+        <tr class="<%= 'warn' if r['warnings'].present? %> <%= 'ai' if r['ai_changes'].present? %>">
+          <td><%= hidden_field_tag "#{base}[include]", "0", id: nil %><%= check_box_tag "#{base}[include]", "1", r["include"] != false, id: nil %></td>
+          <td><%= text_field_tag "#{base}[name]", r["name"], id: nil %>
+            <% if r["existing_id"] %><small class="muted">updates existing</small><% end %>
+            <% Array(r["warnings"]).each do |w| %><small class="warn-text"><%= w %></small><% end %></td>
+          <td><%= text_field_tag "#{base}[position]", r["position"], id: nil %></td>
+          <td><%= text_field_tag "#{base}[companies]", Array(r["companies"]).join(" & "), id: nil %></td>
+          <td><%= select_tag "#{base}[status]", options_for_select(Person::STATUSES, r["status"]), id: nil %></td>
+          <td><%= select_tag "#{base}[industry]", options_for_select(IndustryClassifier.names, r["industry"]), id: nil %></td>
+          <td><%= text_field_tag "#{base}[introducer]", r["introducer"], id: nil, size: 10 %></td>
+          <td><%= text_field_tag "#{base}[context]", r["context"], id: nil, size: 8 %></td>
+          <td><%= select_tag "#{base}[closeness]", options_for_select(1..5, r["closeness"]), id: nil, class: "mini" %></td>
+        </tr>
+        <% if r["ai_changes"].present? %>
+          <tr class="ai-note"><td></td><td colspan="8"><small>Agent: <%= r["ai_changes"].join(" · ") %></small></td></tr>
+        <% end %>
+      <% end %>
+      </tbody>
+    </table>
+    </div>
+    <div class="actions sticky">
+      <% if Agent::Client.configured? %>
+        <%= button_tag "Suggest fixes with AI", name: "commit_action", value: "clean", class: "btn ghost" %>
+      <% end %>
+      <%= button_tag "Import", name: "commit_action", value: "apply", class: "btn" %>
+    </div>
+  <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,14 @@
+<div class="page narrow">
+  <h1>Import people</h1>
+  <p class="muted">Google Sheets: File → Download → CSV. LinkedIn: Settings → Data privacy → Get a copy of your data → Connections.
+    Files stay on your machine; you review every row before anything is saved.</p>
+  <%= form_with url: imports_path, multipart: true, class: "card stack" do |f| %>
+    <label>Upload a CSV <%= f.file_field :file, accept: ".csv" %></label>
+    <% if @files.any? %>
+      <label>…or pick one from <code>data/imports/</code>
+        <%= f.select :existing, @files, include_blank: "—" %></label>
+    <% end %>
+    <%= f.submit "Preview", class: "btn" %>
+  <% end %>
+  <p class="muted small">Spreadsheet columns are matched using <code>spreadsheet_columns</code> in <code>data/profile.yml</code>.</p>
+</div>

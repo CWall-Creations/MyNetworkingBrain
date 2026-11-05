@@ -1,0 +1,4 @@
+# Community-maintained new-grad job lists (JSON). Filtered to your network's companies.
+curated_lists:
+  - name: "SimplifyJobs New-Grad-Positions"
+    url: "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json"

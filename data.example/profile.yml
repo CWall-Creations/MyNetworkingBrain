@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------
+# Your profile. Copy of data.example/ lives in data/ (gitignored).
+# Edit data/profile.yml, never this example file, with your info.
+# ---------------------------------------------------------------
+name: "Alex Example"
+graduation_date: "2027-05-15"
+degree: "B.S. Computer Science"
+school: "Example State University"
+locations: ["San Francisco Bay Area", "Seattle", "Remote"]
+work_authorization: "US citizen"      # or e.g. "F-1 OPT, needs sponsorship"
+resume_file: "resume.md"              # .md, .txt or .pdf inside data/
+
+target_industries: ["AI/ML", "Fintech"]
+curious_industries: ["Developer Tools", "Climate Tech"]
+exclusions: ["Gambling"]
+
+target_roles: ["Software Engineer", "ML Engineer", "Solutions Engineer"]
+
+# Connection strength tuning
+strength:
+  half_life_days: 120     # how fast a connection "cools" without contact
+  default_closeness: 3    # 1-5, used when importing people with no rating
+
+# Reach-out nudges
+reach_out:
+  min_gap_days: 45        # never nudge sooner than this after last contact
+
+# Map YOUR spreadsheet's column headers to the app's fields.
+# Only "name" is required. Anything unmapped is ignored.
+spreadsheet_columns:
+  name: "Name"
+  position: "Role"
+  company: "Company"
+  industry_tags: "Tags"
+  how_met: "How we met"
+  closeness: "Closeness"
+  notes: "Notes"

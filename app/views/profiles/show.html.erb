@@ -1,0 +1,95 @@
+<div class="page narrow">
+  <h1>Profile</h1>
+  <% connected = Agent::Client.configured? %>
+  <% resume_words = @profile.resume_text.split.size %>
+
+  <% if connected && resume_words.positive? %>
+    <div class="card setup-done">
+      <span><span class="step done">✓</span> Claude connected <code><%= Agent::Setup.masked %></code></span>
+      <span><span class="step done">✓</span> Resume · <%= resume_words %> words</span>
+      <details class="setup-more">
+        <summary>Manage</summary>
+        <div class="stack">
+          <%= form_with url: resume_profile_path, multipart: true, class: "inline-form" do |f| %>
+            <%= f.file_field :resume, accept: ".pdf,.md,.txt", required: true %><%= f.submit "Replace resume", class: "btn small ghost" %>
+          <% end %>
+          <%= form_with url: fill_profile_path, class: "inline-form" do |f| %>
+            <%= f.submit "Fill profile from resume", class: "btn ghost small" %>
+            <label class="check"><%= check_box_tag :overwrite, "1" %> replace fields I've already filled</label>
+          <% end %>
+          <%= button_to "Disconnect Claude", api_key_profile_path(remove: 1), class: "link small" %>
+        </div>
+      </details>
+    </div>
+  <% else %>
+  <section class="card setup <%= 'done' if connected %>">
+    <div class="setup-head">
+      <h2><span class="step <%= 'done' if connected %>"><%= connected ? "✓" : "1" %></span> Claude agent</h2>
+      <% if connected %><span class="muted small">Connected · <code><%= Agent::Setup.masked %></code></span><% end %>
+    </div>
+    <% unless connected %>
+      <p class="muted small">Paste a key from <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>
+        (API credit is billed separately from a Claude Pro plan). It's verified, then saved only in <code>.env</code> on this computer.</p>
+      <%= form_with url: api_key_profile_path, class: "inline-form" do |f| %>
+        <%= f.password_field :api_key, placeholder: "sk-ant-…", autocomplete: "off", required: true %>
+        <%= f.submit "Connect", class: "btn small" %>
+      <% end %>
+    <% end %>
+  </section>
+
+  <section class="card setup <%= 'done' if resume_words.positive? %>">
+    <div class="setup-head">
+      <h2><span class="step <%= 'done' if resume_words.positive? %>"><%= resume_words.positive? ? "✓" : "2" %></span> Resume</h2>
+      <% if resume_words.positive? %><span class="muted small"><%= @profile["resume_file"] %> · <%= resume_words %> words read</span><% end %>
+    </div>
+    <%= form_with url: resume_profile_path, multipart: true, class: "inline-form" do |f| %>
+      <%= f.file_field :resume, accept: ".pdf,.md,.txt", required: true %>
+      <%= f.submit resume_words.positive? ? "Replace" : "Upload", class: "btn small" %>
+    <% end %>
+    <% if connected && resume_words.positive? %>
+      <%= form_with url: fill_profile_path, class: "inline-form" do |f| %>
+        <%= f.submit "Fill profile from resume", class: "btn ghost small" %>
+        <label class="check"><%= check_box_tag :overwrite, "1" %> replace fields I've already filled</label>
+      <% end %>
+    <% end %>
+  </section>
+  <% end %>
+
+  <h2 class="section-title">About you <small class="muted">· saved in <code>data/profile.yml</code></small></h2>
+  <%= form_with url: profile_path, method: :patch, scope: :profile, class: "card stack form" do |f| %>
+    <div class="grid2">
+      <label>Name <%= f.text_field :name, value: @profile["name"] %></label>
+      <label>Graduation date <%= f.text_field :graduation_date, value: @profile["graduation_date"] %></label>
+      <label>Degree <%= f.text_field :degree, value: @profile["degree"] %></label>
+      <label>School <%= f.text_field :school, value: @profile["school"] %></label>
+      <label>Work authorization <%= f.text_field :work_authorization, value: @profile["work_authorization"] %></label>
+    </div>
+    <% Profile::LIST_FIELDS.each do |field| %>
+      <label><%= field.humanize %>
+        <%= f.text_field field, value: @profile.public_send(field).join(", "),
+              placeholder: { "locations" => "e.g. Bay Area, Seattle, Remote", "target_industries" => "e.g. AI/ML, Health Tech",
+                             "curious_industries" => "e.g. Sports Tech", "exclusions" => "e.g. Gambling",
+                             "target_roles" => "e.g. Software Engineer, ML Engineer" }[field] %></label>
+    <% end %>
+    <div class="actions"><%= f.submit "Save", class: "btn" %></div>
+  <% end %>
+
+  <div class="page-head">
+    <h2>Industry fit</h2>
+    <%= button_to "Analyze with agent", analyze_profile_path, class: "btn small", disabled: !Agent::Client.configured? %>
+  </div>
+  <% if @fits.any? %>
+    <table class="table">
+      <thead><tr><th>Industry</th><th>Fit</th><th>Contacts</th><th>Why</th></tr></thead>
+      <tbody>
+      <% @fits.each do |fit| %>
+        <tr><td><div class="who"><%= industry_dot(fit.industry) %><%= fit.industry %></div></td>
+          <td><div class="bar small"><span style="width: <%= (fit.score * 100).round %>%"></span></div></td>
+          <td><%= @counts[fit.industry] || 0 %></td><td class="muted"><%= fit.reason %></td></tr>
+      <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="muted">Run the analysis to rank industries by fit with your resume, goals and network.</p>
+  <% end %>
+</div>

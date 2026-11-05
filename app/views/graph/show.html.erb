@@ -1,0 +1,53 @@
+<div class="graph-layout" data-controller="graph" data-graph-url-value="<%= graph_data_path %>">
+  <section class="graph-pane">
+    <svg data-graph-target="svg" aria-label="Your network"></svg>
+    <details class="hint">
+      <summary aria-label="How to read the graph">?</summary>
+      <p>Brighter, thicker threads are stronger connections. A soft pulsing halo means their company is hiring new grads.
+        Hollow rings are the people who introduced you. Click an industry label to spotlight it, or a person to open them.</p>
+    </details>
+    <% if Person.none? %>
+      <div class="empty">
+        <p>Your network is empty.</p>
+        <%= link_to "Import a spreadsheet", new_import_path, class: "btn" %>
+        <%= link_to "Add someone", new_person_path, class: "btn ghost" %>
+      </div>
+    <% end %>
+    <%= turbo_frame_tag "drawer", class: "drawer", data: { graph_target: "drawer" } %>
+  </section>
+
+  <aside class="feed">
+    <div class="feed-head">
+      <h2>Right now</h2>
+      <%= button_to "Refresh", refresh_path, class: "btn small", disabled: @run&.running? %>
+    </div>
+    <%= render "refreshes/status", run: @run %>
+    <% if @feed.empty? %>
+      <p class="muted">Nothing yet. Hit Refresh to check job boards and timing.</p>
+    <% end %>
+    <ol class="feed-items">
+      <% @feed.each do |item| %>
+        <li class="feed-item kind-<%= item.kind %>">
+          <div class="fi-kind"><i></i><%= { "job_match" => "Opening", "reach_out" => "Reach out", "trend" => "Trend", "industry_fit" => "Fit" }[item.kind] %></div>
+          <div class="fi-head">
+            <% if item.url.present? %>
+              <%= link_to item.headline, item.url, target: "_blank", rel: "noopener" %>
+            <% elsif item.person %>
+              <%= link_to item.headline, person_path(item.person), data: { turbo_frame: "drawer" } %>
+            <% else %>
+              <%= item.headline %>
+            <% end %>
+          </div>
+          <div class="fi-reason"><%= item.reason %></div>
+          <div class="fi-actions">
+            <% if item.person && item.kind == "reach_out" %>
+              <%= button_to "Draft", draft_person_path(item.person, reason: item.reason), class: "link", form: { data: { turbo_frame: "drawer" } } %>
+            <% end %>
+            <%= button_to "✓", feed_item_path(item, state: "done"), method: :patch, class: "link", title: "Done" %>
+            <%= button_to "✕", feed_item_path(item, state: "dismissed"), method: :patch, class: "link", title: "Dismiss" %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </aside>
+</div>

@@ -1,0 +1,8 @@
+<% if run %>
+  <details class="run-status" <%= "data-controller=poll data-poll-url-value=#{refresh_path} " if run.running? %>>
+    <summary class="muted">
+      <% if run.running? %>Refreshing…<% else %>Updated <%= time_ago_in_words(run.finished_at || run.created_at) %> ago<% end %>
+    </summary>
+    <pre><%= run.log %></pre>
+  </details>
+<% end %>

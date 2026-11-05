@@ -1,0 +1,26 @@
+<%= form_with model: @person, class: "card stack form" do |f| %>
+  <% if @person.errors.any? %><p class="error"><%= @person.errors.full_messages.to_sentence %></p><% end %>
+  <div class="grid2">
+    <label>Name <%= f.text_field :name, required: true %></label>
+    <label>Position <%= f.text_field :position %></label>
+    <label>Company <small class="muted">(use &amp; for several)</small>
+      <%= f.text_field :companies, value: @companies_text || @person.company_names %></label>
+    <label>Status <%= f.select :status, Person::STATUSES.map { [_1.humanize, _1] } %></label>
+    <label>Industry <%= f.select :industry, IndustryClassifier.names, include_blank: "Auto" %></label>
+    <label>Industry / software tags <small class="muted">(comma separated)</small>
+      <%= f.text_field :industry_tags, value: Array(@person.industry_tags).join(", ") %></label>
+    <label>How you met <small class="muted">e.g. "Work Friend of Uncle"</small> <%= f.text_field :how_met %></label>
+    <label>Closeness (1–5) <%= f.number_field :closeness, in: 1..5 %></label>
+    <label>Met on <%= f.date_field :met_on %></label>
+    <label>Last contact <small class="muted">(if not logging interactions)</small> <%= f.date_field :last_contact_on %></label>
+    <label>LinkedIn URL <%= f.url_field :linkedin_url %></label>
+  </div>
+  <label>Notes <%= f.text_area :notes, rows: 3 %></label>
+  <div class="actions">
+    <%= f.submit "Save", class: "btn" %>
+    <%= link_to "Cancel", people_path, class: "btn ghost" %>
+  </div>
+<% end %>
+<% if @person.persisted? %>
+  <%= button_to "Remove #{@person.name}", person_path(@person), method: :delete, class: "link danger", form: { data: { turbo_confirm: "Remove #{@person.name}?" } } %>
+<% end %>

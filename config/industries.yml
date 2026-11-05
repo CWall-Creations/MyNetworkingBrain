@@ -1,0 +1,23 @@
+# Broad industry buckets used for graph color/clusters and hiring cycles.
+# Generic, not personal: edit freely. "keywords" is the offline fallback
+# classifier (case-insensitive substrings of a person's tags/position/company);
+# with an API key the agent picks the bucket instead.
+buckets:
+  "AI/ML":                    [ "ai", "ml", "machine learning", "llm", "deep learning", "data science" ]
+  "Cloud & Infrastructure":   [ "cloud", "hyperscale", "infrastructure", "devops", "data center", "gpu" ]
+  "Cybersecurity":            [ "cyber", "security", "network security" ]
+  "Defense & Aerospace":      [ "defense", "military", "aerospace", "satellite", "rocket", "radar", "space" ]
+  "Health Tech":              [ "health", "hospital", "clinical", "medical", "medtech", "biotech", "pharma" ]
+  "Fintech":                  [ "fintech", "payments", "banking", "finance", "spend management", "insurtech" ]
+  "Industrial & Construction Tech": [ "construction", "computer vision", "iot", "fleet", "manufacturing", "cad" ]
+  "Hardware & Embedded":      [ "embedded", "hardware", "semiconductor", "mech", "robot", "sensor" ]
+  "Enterprise SaaS":          [ "saas", "b2b", "crm", "enterprise", "consult", "it services" ]
+  "Developer Tools":          [ "developer", "ruby", "devtools", "design software", "productivity" ]
+  "Data Platforms":           [ "data platform", "analytics", "database", "data engineering" ]
+  "Logistics & Supply Chain": [ "shipping", "fulfillment", "logistics", "supply chain" ]
+  "Sports Tech":              [ "sport", "fitness", "esports", "athlet" ]
+  "EdTech":                   [ "education", "edtech", "learning" ]
+  "Consumer & Social":        [ "social media", "consumer", "gaming", "media" ]
+  "Climate & Energy":         [ "renewable", "energy", "climate", "solar" ]
+  "Nonprofit & Community":    [ "nonprofit", "community", "disability", "charity", "foundation" ]
+  "Other": []

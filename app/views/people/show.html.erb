@@ -1,0 +1,66 @@
+<%= turbo_frame_tag "drawer", class: "drawer" do %>
+  <div class="drawer-inner">
+    <div class="drawer-top">
+      <h2><%= @person.name %></h2>
+      <a href="#" class="close" data-action="graph#closeDrawer" aria-label="Close">✕</a>
+    </div>
+    <p class="role">
+      <%= @person.position %><% if @person.companies.any? %> · <%= @person.company_names %><% end %>
+      <% unless @person.status == "employed" %><span class="tag"><%= @person.status.humanize %></span><% end %>
+    </p>
+    <p class="muted who"><%= industry_dot(@person.industry) %><%= @person.industry %><% if @person.industry_tags.present? %> · <%= Array(@person.industry_tags).join(", ") %><% end %></p>
+
+    <% s = @person.strength %>
+    <div class="strength">
+      <div class="bar"><span style="width: <%= (s * 100).round %>%"></span></div>
+      <small><%= StrengthScore.label(s) %> · closeness <%= @person.closeness %>/5 ·
+        <%= @person.last_contact ? "last contact #{time_ago_in_words(@person.last_contact)} ago" : "no contact logged" %></small>
+    </div>
+
+    <dl class="facts">
+      <dt>How you met</dt><dd><%= @person.how_met.presence || "—" %></dd>
+      <% if @person.introducer %><dt>Via</dt><dd><%= @person.introducer.label %></dd><% end %>
+      <% if @person.hub %><dt>Introduced you to</dt><dd><%= @person.hub.people.map(&:name).to_sentence.presence || "—" %></dd><% end %>
+      <% if @person.notes.present? %><dt>Notes</dt><dd><%= @person.notes %></dd><% end %>
+    </dl>
+
+    <% careers = @person.companies.select { |c| c.careers_url.present? } %>
+    <% if careers.any? %>
+      <p class="careers-links">
+        <% careers.each do |c| %><%= link_to "Careers at #{c.name} ↗", c.careers_url, target: "_blank", rel: "noopener" %><% end %>
+      </p>
+    <% end %>
+
+    <% if @jobs.any? %>
+      <h3>Open new-grad roles</h3>
+      <ul class="jobs">
+        <% @jobs.each do |j| %>
+          <li><%= link_to j.title, j.url, target: "_blank", rel: "noopener" %> <small class="muted"><%= j.location&.truncate(30) %></small></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @draft %>
+      <h3>Draft message</h3>
+      <textarea class="draft" rows="6" readonly><%= @draft %></textarea>
+    <% end %>
+
+    <h3>Interactions</h3>
+    <ul class="interactions">
+      <% @person.interactions.first(3).each do |i| %>
+        <li><strong><%= i.occurred_on.strftime("%b %-d, %Y") %></strong> <%= i.kind.humanize %><% if i.notes.present? %> — <%= i.notes %><% end %></li>
+      <% end %>
+    </ul>
+    <%= form_with model: [@person, Interaction.new(occurred_on: Date.current)], class: "inline-form" do |f| %>
+      <%= f.date_field :occurred_on %>
+      <%= f.select :kind, Interaction::KINDS.map { [_1.humanize, _1] } %>
+      <%= f.text_field :notes, placeholder: "What you talked about" %>
+      <%= f.submit "Log", class: "btn small" %>
+    <% end %>
+
+    <div class="drawer-actions">
+      <%= button_to "Draft a message", draft_person_path(@person), class: "btn ghost small" %>
+      <%= link_to "Edit", edit_person_path(@person), class: "btn ghost small", data: { turbo_frame: "_top" } %>
+    </div>
+  </div>
+<% end %>

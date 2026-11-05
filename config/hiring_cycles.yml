@@ -1,0 +1,30 @@
+# When new grad hiring tends to happen, by industry bucket (generic US patterns).
+# months: 1-12. "default" applies to buckets not listed.
+# Reach-out nudges prefer these windows: reach out ~2-6 weeks before/at the start.
+default:
+  windows:
+    - { months: [8, 9, 10, 11], label: "Fall new-grad recruiting" }
+    - { months: [1, 2, 3], label: "Spring hiring wave" }
+quiet_months: [12]   # holidays: avoid nudges mid/late December
+industries:
+  "Fintech":
+    windows:
+      - { months: [7, 8, 9, 10], label: "Finance/fintech fall cycle (starts early)" }
+      - { months: [1, 2], label: "Spring backfill" }
+  "Defense & Aerospace":
+    windows:
+      - { months: [9, 10, 11], label: "Defense fall campus hiring" }
+      - { months: [2, 3, 4], label: "Defense spring hiring (clearance timelines are long)" }
+  "Enterprise SaaS":
+    windows:
+      - { months: [8, 9, 10, 11], label: "SaaS fall recruiting" }
+      - { months: [1, 2, 3, 4], label: "New fiscal year headcount" }
+  "Nonprofit & Community":
+    windows:
+      - { months: [3, 4, 5, 6], label: "Spring/summer hiring" }
+  "Sports Tech":
+    windows:
+      - { months: [5, 6, 7, 8], label: "Off-season hiring" }
+  "AI/ML":
+    windows:
+      - { months: [1,2,3,4,5,6,7,8,9,10,11], label: "AI labs/startups hire year-round" }
